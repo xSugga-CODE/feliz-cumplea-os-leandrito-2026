@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feliz Cumple Conocidoh</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --q:#1da1f2;
+    --q2:#0d8bd9;
+    --dark:#050a0f;
+    --dark2:#0a1520;
+    --dark3:#0f1f2e;
+    --card:#0d1b2a;
+    --border:rgba(29,161,242,0.25);
+    --text:#e8f4fd;
+    --muted:rgba(232,244,253,0.55);
+  }
+  body{background:var(--dark);color:var(--text);font-family:'Syne',sans-serif;overflow-x:hidden;cursor:none}
+  .cursor{position:fixed;width:12px;height:12px;background:var(--q);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.1s;mix-blend-mode:screen}
+  .cursor-trail{position:fixed;width:30px;height:30px;border:1px solid rgba(29,161,242,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all 0.15s ease}
+
+  /* CANVAS DE PARTÍCULAS */
+  #particles-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.35}
+
+  /* SECCIONES */
+  .section{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center}
+
+  /* HERO */
+  .hero-badge{font-family:'Space Mono',monospace;font-size:11px;color:var(--q);letter-spacing:3px;text-transform:uppercase;border:1px solid var(--border);padding:6px 16px;border-radius:20px;margin-bottom:32px;display:inline-block;animation:pulseBorder 2s infinite}
+  @keyframes pulseBorder{0%,100%{border-color:rgba(29,161,242,0.25)}50%{border-color:rgba(29,161,242,0.8);box-shadow:0 0 20px rgba(29,161,242,0.3)}}
+  
+  .hero-name{font-size:clamp(56px,12vw,110px);font-weight:800;line-height:0.9;color:#fff;position:relative;display:inline-block}
+  .hero-name .highlight{color:var(--q);position:relative;display:inline-block}
+  .hero-name .highlight::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:3px;background:var(--q);animation:underlineGrow 1s 0.8s forwards ease-out}
+  @keyframes underlineGrow{to{width:100%}}
+
+  .hero-sub{font-size:clamp(18px,3vw,26px);color:var(--muted);margin:24px 0 40px;font-weight:400;line-height:1.5}
+  .hero-sub span{color:var(--q);font-weight:700}
+
+  .age-counter{display:inline-flex;align-items:center;gap:4px;margin-bottom:16px}
+  .age-digit{font-family:'Space Mono',monospace;font-size:clamp(72px,15vw,140px);font-weight:700;color:var(--q);line-height:1;display:inline-block;animation:countUp 1.2s cubic-bezier(0.23,1,0.32,1) forwards}
+  @keyframes countUp{from{opacity:0;transform:translateY(40px) scale(0.8)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+  .age-label{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:2px;margin-top:8px}
+
+  /* BOTONES */
+  .btn-group{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:32px}
+  .btn{font-family:'Space Mono',monospace;font-size:12px;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.2s;text-decoration:none;display:inline-block}
+  .btn-primary{background:var(--q);color:#fff}
+  .btn-primary:hover{background:var(--q2);transform:translateY(-2px);box-shadow:0 8px 25px rgba(29,161,242,0.4)}
+  .btn-outline{background:transparent;color:var(--q);border:1px solid var(--border)}
+  .btn-outline:hover{background:rgba(29,161,242,0.1);transform:translateY(-2px)}
+  .btn:active{transform:scale(0.97)}
+
+  /* GRID CARDS */
+  .cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;width:100%;max-width:900px;margin:40px auto 0}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:left;transition:all 0.3s;position:relative;overflow:hidden}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--q),transparent);opacity:0;transition:opacity 0.3s}
+  .card:hover{transform:translateY(-4px);border-color:rgba(29,161,242,0.5);box-shadow:0 12px 40px rgba(29,161,242,0.15)}
+  .card:hover::before{opacity:1}
+  .card-icon{font-size:32px;margin-bottom:16px;display:block}
+  .card-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:8px}
+  .card-desc{font-size:14px;color:var(--muted);line-height:1.6;font-family:'Space Mono',monospace}
+
+  /* SECCIÓN QUIMII */
+  .quimii-section{background:linear-gradient(135deg,var(--dark3) 0%,var(--dark2) 100%);border:1px solid var(--border);border-radius:24px;padding:60px 40px;max-width:860px;width:100%;position:relative;overflow:hidden}
+  .quimii-section::after{content:'QUIMII';position:absolute;right:-20px;bottom:-30px;font-size:120px;font-weight:800;color:rgba(29,161,242,0.04);line-height:1;pointer-events:none;letter-spacing:-5px}
+  .quimii-logo{font-size:clamp(48px,8vw,72px);font-weight:800;color:#fff;letter-spacing:-2px}
+  .quimii-logo span{color:var(--q)}
+  .quimii-tag{font-family:'Space Mono',monospace;font-size:11px;color:var(--q);background:rgba(29,161,242,0.12);border:1px solid var(--border);padding:4px 12px;border-radius:4px;margin:0 4px 8px;display:inline-block}
+  .quimii-status{display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin-top:20px}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;animation:blink 2s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+  /* GAME - DUELO DE PROGRAMADORES */
+  .game-section{max-width:700px;width:100%}
+  .game-title{font-size:clamp(28px,5vw,42px);font-weight:800;color:#fff;margin-bottom:8px}
+  .game-subtitle{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin-bottom:40px;letter-spacing:1px}
+  
+  .vs-container{display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:center;margin-bottom:32px}
+  .player-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center;transition:all 0.3s}
+  .player-card.winner{border-color:var(--q);box-shadow:0 0 30px rgba(29,161,242,0.25)}
+  .player-card.loser{opacity:0.5}
+  .player-avatar{width:60px;height:60px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:28px;border:2px solid var(--border)}
+  .player-name{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px}
+  .player-tag{font-family:'Space Mono',monospace;font-size:10px;color:var(--q);letter-spacing:1px}
+  .player-score{font-family:'Space Mono',monospace;font-size:36px;font-weight:700;color:var(--q);margin-top:12px}
+  
+  .vs-badge{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--muted);text-align:center}
+
+  .quiz-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:left}
+  .quiz-q{font-size:16px;color:#fff;font-weight:700;margin-bottom:20px;line-height:1.5}
+  .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .quiz-opt{background:var(--dark3);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-family:'Space Mono',monospace;font-size:12px;color:var(--text);cursor:pointer;transition:all 0.2s;text-align:left}
+  .quiz-opt:hover{border-color:var(--q);background:rgba(29,161,242,0.08);color:#fff}
+  .quiz-opt.correct{border-color:#22c55e;background:rgba(34,197,94,0.1);color:#22c55e}
+  .quiz-opt.wrong{border-color:#ef4444;background:rgba(239,68,68,0.1);color:#ef4444}
+  .quiz-opt:disabled{cursor:not-allowed}
+  .quiz-result{text-align:center;padding:16px;font-family:'Space Mono',monospace;font-size:13px;color:var(--q);display:none}
+  .quiz-next{margin-top:16px;width:100%}
+
+  /* TERMINAL */
+  .terminal{background:#000;border:1px solid var(--border);border-radius:12px;padding:0;overflow:hidden;max-width:600px;width:100%;font-family:'Space Mono',monospace;font-size:13px}
+  .terminal-header{background:var(--dark2);padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+  .dot{width:12px;height:12px;border-radius:50%}
+  .dot.r{background:#ff5f57}.dot.y{background:#ffbd2e}.dot.g{background:#28c840}
+  .terminal-title{flex:1;text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px}
+  .terminal-body{padding:20px;min-height:220px;max-height:320px;overflow-y:auto}
+  .terminal-body::-webkit-scrollbar{width:4px}
+  .terminal-body::-webkit-scrollbar-track{background:transparent}
+  .terminal-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  .terminal-line{margin-bottom:4px;line-height:1.6}
+  .terminal-line .prompt{color:var(--q)}
+  .terminal-line .cmd{color:#fff}
+  .terminal-line .output{color:#a3e635}
+  .terminal-line .error{color:#f87171}
+  .terminal-line .warn{color:#fbbf24}
+  .terminal-input-row{display:flex;align-items:center;gap:8px;padding:0 20px 16px;border-top:1px solid rgba(29,161,242,0.1);margin-top:8px}
+  .terminal-input-row .prompt{color:var(--q);white-space:nowrap}
+  .terminal-input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-family:'Space Mono',monospace;font-size:13px;caret-color:var(--q)}
+
+  /* MENSAJES FLOTANTES */
+  .toast-container{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+  .toast{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-family:'Space Mono',monospace;font-size:12px;color:var(--text);transform:translateX(120%);transition:transform 0.3s ease;pointer-events:auto;max-width:280px}
+  .toast.show{transform:translateX(0)}
+
+  /* KONFETTI */
+  .konfetti-piece{position:fixed;width:8px;height:8px;pointer-events:none;z-index:50;animation:konfettiFall linear forwards}
+  @keyframes konfettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+  /* SCROLLBAR GLOBAL */
+  html{scroll-behavior:smooth}
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-track{background:var(--dark)}
+  ::-webkit-scrollbar-thumb{background:var(--border)}
+
+  /* DIVISOR */
+  .divider{width:80px;height:2px;background:linear-gradient(90deg,transparent,var(--q),transparent);margin:0 auto 24px}
+
+  /* SECTION TITLE */
+  .section-title{font-size:clamp(32px,5vw,52px);font-weight:800;color:#fff;margin-bottom:8px}
+  .section-title span{color:var(--q)}
+  .section-desc{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:40px}
+
+  /* LINEA DE TIEMPO */
+  .timeline{max-width:600px;width:100%;text-align:left}
+  .timeline-item{display:flex;gap:24px;margin-bottom:32px;position:relative}
+  .timeline-item::before{content:'';position:absolute;left:19px;top:40px;bottom:-32px;width:1px;background:var(--border)}
+  .timeline-item:last-child::before{display:none}
+  .tl-dot{width:40px;height:40px;border-radius:50%;background:var(--card);border:2px solid var(--q);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;position:relative;z-index:1}
+  .tl-content{flex:1;padding-top:8px}
+  .tl-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px}
+  .tl-desc{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);line-height:1.6}
+
+  /* BOTÓN CONFETTI */
+  .epic-btn{font-family:'Space Mono',monospace;font-size:14px;padding:16px 36px;background:var(--q);color:#fff;border:none;border-radius:12px;cursor:pointer;font-weight:700;letter-spacing:2px;text-transform:uppercase;transition:all 0.2s;position:relative;overflow:hidden}
+  .epic-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(45deg,transparent 30%,rgba(255,255,255,0.1) 50%,transparent 70%);transform:translateX(-100%);transition:transform 0.4s}
+  .epic-btn:hover::after{transform:translateX(100%)}
+  .epic-btn:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(29,161,242,0.5)}
+  .epic-btn:active{transform:scale(0.97)}
+
+  /* NAV */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:500;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;background:rgba(5,10,15,0.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(29,161,242,0.1)}
+  .nav-logo{font-family:'Space Mono',monospace;font-size:12px;color:var(--q);letter-spacing:2px}
+  .nav-links{display:flex;gap:20px}
+  .nav-link{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);cursor:pointer;letter-spacing:1px;transition:color 0.2s;text-transform:uppercase;background:none;border:none;padding:0}
+  .nav-link:hover{color:var(--q)}
+
+  /* FOOTER */
+  .footer{position:relative;z-index:1;padding:40px 20px;text-align:center;border-top:1px solid var(--border)}
+  .footer-text{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);line-height:2;letter-spacing:1px}
+  .footer-text span{color:var(--q)}
+
+  /* GLITCH */
+  .glitch{position:relative;display:inline-block}
+  .glitch::before,.glitch::after{content:attr(data-text);position:absolute;top:0;left:0;right:0}
+  .glitch::before{animation:glitch1 3s infinite;clip-path:polygon(0 0,100% 0,100% 35%,0 35%);color:var(--q);opacity:0.7}
+  .glitch::after{animation:glitch2 3s infinite;clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%);color:#ff006e;opacity:0.5}
+  @keyframes glitch1{0%,90%,100%{transform:translate(0)}92%{transform:translate(-3px,1px)}94%{transform:translate(3px,-1px)}96%{transform:translate(-2px,2px)}98%{transform:translate(2px,-2px)}}
+  @keyframes glitch2{0%,90%,100%{transform:translate(0)}91%{transform:translate(3px,-1px)}93%{transform:translate(-3px,1px)}95%{transform:translate(2px,2px)}97%{transform:translate(-2px,-2px)}}
+
+  /* AURA METER */
+  .aura-container{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:560px;width:100%}
+  .aura-label{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+  .aura-bar-bg{background:var(--dark3);border-radius:100px;height:12px;overflow:hidden;margin-bottom:8px}
+  .aura-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--q),#60efff);width:0;transition:width 1.5s cubic-bezier(0.23,1,0.32,1)}
+  .aura-value{font-family:'Space Mono',monospace;font-size:11px;color:var(--q);text-align:right}
+  .aura-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:24px}
+
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:800;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(4px)}
+  .modal-overlay.active{opacity:1;pointer-events:all}
+  .modal-box{background:var(--dark2);border:1px solid var(--border);border-radius:20px;padding:40px;max-width:460px;width:90%;transform:scale(0.9);transition:transform 0.3s;text-align:center}
+  .modal-overlay.active .modal-box{transform:scale(1)}
+  .modal-title{font-size:28px;font-weight:800;color:#fff;margin-bottom:12px}
+  .modal-body{font-family:'Space Mono',monospace;font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:28px}
+  .modal-body span{color:var(--q)}
+  .modal-close{font-family:'Space Mono',monospace;font-size:12px;padding:10px 24px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;cursor:pointer;letter-spacing:1px;margin-top:8px;transition:all 0.2s}
+  .modal-close:hover{color:#fff;border-color:rgba(29,161,242,0.4)}
+</style>
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-trail" id="cursor-trail"></div>
+<div class="toast-container" id="toast-container"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">// conocidoh.dev</div>
+  <div class="nav-links">
+    <button class="nav-link" onclick="scrollToSection('quimii')">Quimii</button>
+    <button class="nav-link" onclick="scrollToSection('duelo')">Duelo</button>
+    <button class="nav-link" onclick="scrollToSection('terminal')">Terminal</button>
+    <button class="nav-link" onclick="scrollToSection('aura')">Aura</button>
+  </div>
+</nav>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">🎮</div>
+    <div class="modal-body" id="modal-body"></div>
+    <button class="btn btn-primary" onclick="closeModal()">Aceptar</button>
+    <br>
+    <button class="modal-close" onclick="closeModal()">cerrar</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="section" style="padding-top:120px">
+  <div class="hero-badge">// &lt;18 años de puro caos /&gt;</div>
+  
+  <div style="margin-bottom:16px">
+    <div class="age-counter">
+      <span class="age-digit glitch" data-text="18">18</span>
+    </div>
+    <div class="age-label">años de existir en producción</div>
+  </div>
+  
+  <h1 class="hero-name">
+    FELIZ CUMPLE<br>
+    <span class="highlight">CONOCIDOH</span>
+  </h1>
+  
+  <p class="hero-sub">
+    aka <span>Leandro</span> · programador · co-founder de Quimii<br>
+    y el imbécil más querido del mundo
+  </p>
+  
+  <div class="btn-group">
+    <button class="epic-btn" onclick="launchConfetti()">🎉 ACTIVAR MODO CUMPLEAÑOS</button>
+  </div>
+  
+  <div style="margin-top:56px;font-family:'Space Mono',monospace;font-size:11px;color:rgba(29,161,242,0.4);letter-spacing:3px;animation:blink 2s infinite">▼ SCROLL</div>
+</section>
+
+<!-- QUIMII -->
+<section class="section" id="quimii">
+  <div class="divider"></div>
+  <div class="section-title">Proyecto <span>Quimii</span></div>
+  <div class="section-desc">// el proyecto que nos tiene en vela a las 3am</div>
+  
+  <div class="quimii-section">
+    <div style="margin-bottom:24px">
+      <div class="quimii-logo">Qui<span>mii</span></div>
+      <p style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin-top:8px">Red social · En construcción activa</p>
+    </div>
+    
+    <div style="margin-bottom:28px">
+      <span class="quimii-tag">typescript</span>
+      <span class="quimii-tag">react</span>
+      <span class="quimii-tag">node.js</span>
+      <span class="quimii-tag">#1da1f2</span>
+      <span class="quimii-tag">aura ✨</span>
+    </div>
+    
+    <div class="cards-grid" style="margin-top:0">
+      <div class="card" onclick="showModal('Deploy en producción 🚀','El día que <span>Quimii</span> llegue a producción va a ser el día más épico de ambas vidas. Por ahora... seguimos pusheando features a las 3am y rezando que no explote el servidor.')">
+        <span class="card-icon">🚀</span>
+        <div class="card-title">Deploy a prod</div>
+        <div class="card-desc">El objetivo final. Click para saber cuándo.</div>
+      </div>
+      <div class="card" onclick="showModal('Bugs a las 3am 🐛','El ciclo sagrado: commitear un fix → crear 3 bugs nuevos → commitear los fixes de los fixes → dormir a las 5am. <span>Leandro</span>, vos sabés de lo que hablo.')">
+        <span class="card-icon">🐛</span>
+        <div class="card-title">Bugs mágicos</div>
+        <div class="card-desc">Los que aparecen solos después de medianoche.</div>
+      </div>
+      <div class="card" onclick="showModal('El color #1da1f2 💙','¿Por qué este color exactamente? Misterio insondable. Pero ya está en el código, en las variables CSS, en nuestras almas. <span>Es el color de Quimii.</span> Punto.')">
+        <span class="card-icon">💙</span>
+        <div class="card-title">#1da1f2 forever</div>
+        <div class="card-desc">El color que define una generación. Nuestra generación.</div>
+      </div>
+    </div>
+    
+    <div class="quimii-status">
+      <div class="status-dot"></div>
+      <span>Quimii está en desarrollo activo — <span style="color:var(--q)">commit history creciendo</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- DUELO DE PROGRAMADORES -->
+<section class="section" id="duelo">
+  <div class="divider"></div>
+  <div class="section-title">Duelo de <span>Programadores</span></div>
+  <div class="section-desc">// quiz épico · ¿quién sabe más?</div>
+  
+  <div class="game-section">
+    <div class="vs-container">
+      <div class="player-card winner" id="p1card">
+        <div class="player-avatar" style="background:rgba(29,161,242,0.1);border-color:var(--q)">😎</div>
+        <div class="player-name">Yo</div>
+        <div class="player-tag">// el que gana siempre</div>
+        <div class="player-score" id="p1score">0</div>
+      </div>
+      <div class="vs-badge">VS</div>
+      <div class="player-card" id="p2card">
+        <div class="player-avatar" style="background:rgba(239,68,68,0.1);border-color:#ef4444">🤡</div>
+        <div class="player-name">Conocidoh</div>
+        <div class="player-tag">// el imbécil querido</div>
+        <div class="player-score" id="p2score">0</div>
+      </div>
+    </div>
+    
+    <div class="quiz-box">
+      <div class="quiz-q" id="quiz-question">Cargando pregunta épica...</div>
+      <div class="quiz-options" id="quiz-options"></div>
+      <div class="quiz-result" id="quiz-result"></div>
+      <button class="btn btn-primary quiz-next" id="quiz-next" onclick="nextQuestion()" style="display:none">Siguiente pregunta →</button>
+    </div>
+  </div>
+</section>
+
+<!-- TERMINAL -->
+<section class="section" id="terminal">
+  <div class="divider"></div>
+  <div class="section-title">Terminal <span>Interactiva</span></div>
+  <div class="section-desc">// intentá "help" para empezar</div>
+  
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="dot r"></div>
+      <div class="dot y"></div>
+      <div class="dot g"></div>
+      <div class="terminal-title">conocidoh@quimii: ~</div>
+    </div>
+    <div class="terminal-body" id="terminal-output">
+      <div class="terminal-line"><span class="output">Quimii OS v18.0.0 — Leandro Edition</span></div>
+      <div class="terminal-line"><span class="output">Copyright (c) 2025 — Feliz cumple, imbécil ❤️</span></div>
+      <div class="terminal-line" style="margin-top:8px"><span class="warn">Tip: escribí "help" para ver comandos disponibles</span></div>
+    </div>
+    <div class="terminal-input-row">
+      <span class="prompt">conocidoh@quimii:~$&nbsp;</span>
+      <input class="terminal-input" id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="_" onkeydown="handleTerminal(event)">
+    </div>
+  </div>
+</section>
+
+<!-- AURA METER -->
+<section class="section" id="aura">
+  <div class="divider"></div>
+  <div class="section-title"><span>Aura</span> Report</div>
+  <div class="section-desc">// análisis oficial del nivel de aura</div>
+  
+  <div class="aura-container">
+    <div class="aura-title">Leandro · Conocidoh · 18 años</div>
+    
+    <div style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <div class="aura-label">Nivel de aura</div>
+        <div class="aura-value" id="aura-v1">0%</div>
+      </div>
+      <div class="aura-bar-bg"><div class="aura-bar" id="aura-b1" data-val="94"></div></div>
+    </div>
+    
+    <div style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <div class="aura-label">Calidad de commits</div>
+        <div class="aura-value" id="aura-v2">0%</div>
+      </div>
+      <div class="aura-bar-bg"><div class="aura-bar" id="aura-b2" data-val="61" style="background:linear-gradient(90deg,#a78bfa,#60efff)"></div></div>
+    </div>
+    
+    <div style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <div class="aura-label">Probabilidad de ganarme</div>
+        <div class="aura-value" id="aura-v3">0%</div>
+      </div>
+      <div class="aura-bar-bg"><div class="aura-bar" id="aura-b3" data-val="7" style="background:linear-gradient(90deg,#ef4444,#fbbf24)"></div></div>
+    </div>
+    
+    <div style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <div class="aura-label">Indispensabilidad en Quimii</div>
+        <div class="aura-value" id="aura-v4">0%</div>
+      </div>
+      <div class="aura-bar-bg"><div class="aura-bar" id="aura-b4" data-val="99" style="background:linear-gradient(90deg,#22c55e,#60efff)"></div></div>
+    </div>
+    
+    <div style="border-top:1px solid var(--border);padding-top:20px;margin-top:8px;font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);line-height:1.8">
+      <span style="color:var(--q)">//</span> Veredicto: Conocidoh es un imbécil de nivel 18 con aura +9999.<br>
+      <span style="color:var(--q)">//</span> Es mi hijo en todos los juegos, pero mi socio en Quimii.<br>
+      <span style="color:var(--q)">//</span> Feliz cumple, hdp. Que los próximos 18 sean igual de épicos. 🎉
+    </div>
+  </div>
+  
+  <div class="btn-group" style="margin-top:40px">
+    <button class="epic-btn" onclick="launchConfetti()">🎂 FESTEJAR OTRA VEZ</button>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="section">
+  <div class="divider"></div>
+  <div class="section-title">La <span>Historia</span></div>
+  <div class="section-desc">// del origen al presente</div>
+  
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="tl-dot">👶</div>
+      <div class="tl-content">
+        <div class="tl-title">Año 0 — Nace Leandro</div>
+        <div class="tl-desc">El mundo no sabía lo que se venía. Hello World compilado con éxito.</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-dot">💻</div>
+      <div class="tl-content">
+        <div class="tl-title">Primeros commits</div>
+        <div class="tl-desc">Descubre la programación. Los bugs empiezan a ser su idioma nativo.</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-dot">🤝</div>
+      <div class="tl-content">
+        <div class="tl-title">Se vuelve mi hijo gamer</div>
+        <div class="tl-desc">Inicio de una racha perdedora histórica que sigue hasta hoy. Cada juego. Siempre.</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-dot">💙</div>
+      <div class="tl-content">
+        <div class="tl-title">Nace Quimii</div>
+        <div class="tl-desc">Se decide construir la mejor red social del planeta con #1da1f2 como color de alma.</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="tl-dot">🎂</div>
+      <div class="tl-content">
+        <div class="tl-title">Hoy — 18 años</div>
+        <div class="tl-desc">Mayor de edad. Mismo Conocidoh. Más caos. Más Quimii. Feliz cumple, hdp ❤️</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-text">
+    Hecho con <span>❤️ + #1da1f2</span> para <span>Conocidoh</span><br>
+    18 años · <span>Quimii co-founder</span> · imbécil oficial<br>
+    <span>// feliz cumple leandro 🎉</span>
+  </div>
+</footer>
+
+<script>
+// CURSOR
+const cur = document.getElementById('cursor');
+const trail = document.getElementById('cursor-trail');
+let mx=0,my=0,tx=0,ty=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+setInterval(()=>{tx+=(mx-tx)*0.15;ty+=(my-ty)*0.15;trail.style.left=tx+'px';trail.style.top=ty+'px'},16);
+
+// PARTICLES
+const canvas=document.getElementById('particles-canvas');
+const ctx=canvas.getContext('2d');
+let particles=[];
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+resizeCanvas();
+window.addEventListener('resize',resizeCanvas);
+for(let i=0;i<60;i++){particles.push({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,r:Math.random()*2+0.5,o:Math.random()*0.6+0.2})}
+function drawParticles(){ctx.clearRect(0,0,canvas.width,canvas.height);particles.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(29,161,242,${p.o})`;ctx.fill();p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>canvas.width)p.vx*=-1;if(p.y<0||p.y>canvas.height)p.vy*=-1});requestAnimationFrame(drawParticles)}
+drawParticles();
+
+// CONFETTI
+function launchConfetti(){
+  const colors=['#1da1f2','#60efff','#ff006e','#fbbf24','#a78bfa','#22c55e','#fff'];
+  for(let i=0;i<120;i++){
+    setTimeout(()=>{
+      const k=document.createElement('div');
+      k.className='konfetti-piece';
+      k.style.left=Math.random()*100+'vw';
+      k.style.top='-20px';
+      k.style.background=colors[Math.floor(Math.random()*colors.length)];
+      k.style.borderRadius=Math.random()>0.5?'50%':'2px';
+      k.style.width=(Math.random()*8+4)+'px';
+      k.style.height=(Math.random()*8+4)+'px';
+      k.style.animationDuration=(Math.random()*2+1.5)+'s';
+      k.style.animationDelay=(Math.random()*0.5)+'s';
+      document.body.appendChild(k);
+      setTimeout(()=>k.remove(),4000);
+    },i*30);
+  }
+  showToast('🎉 ¡FELIZ CUMPLE CONOCIDOH!');
+}
+
+// TOASTS
+function showToast(msg){
+  const t=document.createElement('div');
+  t.className='toast';
+  t.textContent=msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(()=>t.classList.add('show'),100);
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400)},3500);
+}
+
+// MODAL
+function showModal(title,body){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').innerHTML=body;
+  document.getElementById('modal').classList.add('active');
+}
+function closeModal(e){
+  if(!e||e.target===document.getElementById('modal'))document.getElementById('modal').classList.remove('active');
+}
+
+// SCROLL
+function scrollToSection(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
+
+// QUIZ
+const questions=[
+  {q:"¿Cuál es la complejidad de un algoritmo que busca en un array ordenado con binary search?",opts:["O(n)","O(log n)","O(n²)","O(1)"],correct:1,a:"Exacto, O(log n). Conocidoh lo sabe... o debería."},
+  {q:"En Git, ¿qué comando deshace el ÚLTIMO commit sin perder los cambios?",opts:["git revert HEAD","git reset --hard HEAD~1","git reset --soft HEAD~1","git checkout HEAD~1"],correct:2,a:"git reset --soft HEAD~1. El clásico que todos googlearíamos a las 3am."},
+  {q:"¿Qué significa CRUD en desarrollo web?",opts:["Create, Run, Update, Deploy","Create, Read, Update, Delete","Clone, Repository, Update, Debug","Compile, Run, Upload, Deploy"],correct:1,a:"Create, Read, Update, Delete. Lo básico de todo backend."},
+  {q:"¿Cuál es el color principal de Quimii?",opts:["#ff0000","#00ff00","#1da1f2","#ffffff"],correct:2,a:"#1da1f2 🔵 El color más importante del universo Quimii."},
+  {q:"¿Qué hace 'git stash'?",opts:["Elimina el repositorio","Guarda cambios temporalmente sin commitear","Crea un nuevo branch","Pushea a producción"],correct:1,a:"Guarda los cambios en un stack temporal. Indispensable cuando te interrumpen con un 'che, fix this bug rápido'."},
+  {q:"Un programador tiene 18 años. ¿Es capaz de ganarle a su amigo en algún juego?",opts:["Sí, con práctica","Quizás con suerte","Definitivamente no","Nunca jamás"],correct:3,a:"¡Correcto! Nunca jamás. Las estadísticas son claras, Conocidoh."},
+];
+let qIndex=0, p1=0, p2=0, answered=false;
+function loadQuestion(){
+  if(qIndex>=questions.length){document.getElementById('quiz-question').textContent='🏆 Game over! Revisa los puntajes arriba.';document.getElementById('quiz-options').innerHTML='';document.getElementById('quiz-next').style.display='none';if(p1>p2)showModal('🏆 Resultado Final','Gané yo como siempre. <span>'+p1+'</span> vs <span>'+p2+'</span>. Conocidoh, hacé algo.');else showModal('😱 Resultado Imposible','Ganó Conocidoh de alguna manera. <span>'+p2+'</span> vs <span>'+p1+'</span>. Esto nunca pasó.');return}
+  answered=false;
+  const q=questions[qIndex];
+  document.getElementById('quiz-question').textContent=q.q;
+  document.getElementById('quiz-result').style.display='none';
+  document.getElementById('quiz-next').style.display='none';
+  const opts=document.getElementById('quiz-options');
+  opts.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='quiz-opt';
+    b.textContent=o;
+    b.onclick=()=>answerQ(i,b);
+    opts.appendChild(b);
+  });
+}
+function answerQ(idx,btn){
+  if(answered)return;answered=true;
+  const q=questions[qIndex];
+  const btns=document.querySelectorAll('.quiz-opt');
+  btns.forEach((b,i)=>{b.disabled=true;if(i===q.correct)b.classList.add('correct')});
+  if(idx===q.correct){btn.classList.add('correct');p1++;showToast('✅ Respuesta correcta! (+1 para mí obvio)')}
+  else{btn.classList.add('wrong');p2++;showToast('❌ Era la '+q.opts[q.correct]+', Conocidoh...')}
+  document.getElementById('p1score').textContent=p1;
+  document.getElementById('p2score').textContent=p2;
+  const res=document.getElementById('quiz-result');
+  res.textContent=q.a;res.style.display='block';
+  document.getElementById('quiz-next').style.display='block';
+  qIndex++;
+}
+function nextQuestion(){loadQuestion()}
+loadQuestion();
+
+// TERMINAL
+const termCmds={
+  help:{fn:()=>`Comandos disponibles:\n  <span class="output">whoami</span>     — identidad del usuario\n  <span class="output">status</span>     — estado de Quimii\n  <span class="output">roast</span>      — insulto cariñoso\n  <span class="output">18</span>         — mensaje especial\n  <span class="output">skills</span>     — stack de Conocidoh\n  <span class="output">games</span>      — historial de partidas\n  <span class="output">deploy</span>     — deploy Quimii a prod\n  <span class="output">clear</span>      — limpiar terminal`},
+  whoami:{fn:()=>'<span class="output">Leandro "Conocidoh" [APELLIDO]</span>\nRol: Co-founder de Quimii · Programador · Hijo oficial en todos los juegos\nEstado: 18 años · En producción'},
+  status:{fn:()=>'<span class="output">$ quimii status</span>\n<span class="warn">⚡ Frontend: en desarrollo activo</span>\n<span class="warn">⚡ Backend: rutas creciendo</span>\n<span class="output">✅ Color #1da1f2: PERMANENTE</span>\n<span class="output">✅ Ambición: NIVEL 9999</span>\n<span class="warn">⏳ Deploy a prod: pronto™</span>'},
+  roast:{fn:()=>{const r=['Conocidoh: el único developer que crea bugs antes de escribir la primera línea de código.','Si existiera un framework llamado "PerdidoJS", vos serías el contribuidor principal.','Tu código tiene más comentarios "TODO" que líneas funcionales, y aún así te quiero bro.','Tu tasa de victorias en juegos contra mí es estadísticamente igual a 0.00%. Es arte.','Encontraron un pull request tuyo de 2 años que todavía tiene merge conflicts. Clásico.'];return'<span class="warn">'+r[Math.floor(Math.random()*r.length)]+'</span>'}},
+  '18':{fn:()=>'<span class="output">╔══════════════════════════════════════╗</span>\n<span class="output">║  FELIZ CUMPLEAÑOS, CONOCIDOH  🎂    ║</span>\n<span class="output">║  18 años de bugs, commits y caos    ║</span>\n<span class="output">║  Que Quimii llegue a prod este año  ║</span>\n<span class="output">║  Te re quiero, imbécil ❤️           ║</span>\n<span class="output">╚══════════════════════════════════════╝</span>'},
+  skills:{fn:()=>'<span class="output">$ conocidoh --list-skills</span>\nJavaScript/TypeScript  ████████░░ 80%\nReact                  ███████░░░ 70%\nNode.js                ███████░░░ 70%\nGit blame a otros      ██████████ 100%\nPerder en juegos       ██████████ 100%\nHacer deploy a las 3am ████████░░ 80%'},
+  games:{fn:()=>'<span class="output">$ git log --games --oneline</span>\n<span class="error">DEFEAT  · Partida #001 - #∞</span>\n<span class="error">DEFEAT  · Todos los juegos</span>\n<span class="error">DEFEAT  · Siempre</span>\n<span class="warn">Total: 0 victorias vs mí (histórico irrefutable)</span>'},
+  deploy:{fn:()=>{setTimeout(()=>{addTerminalLine('<span class="output">✅ Quimii deployed! Just kidding... 404 Not Ready Yet</span>');},1200);return'<span class="warn">Iniciando deploy...\n⏳ Compilando...\n⏳ Validando...\n⏳ Esperando que Conocidoh haga el último merge...</span>'}},
+  clear:{fn:()=>{document.getElementById('terminal-output').innerHTML='<div class="terminal-line"><span class="output">Terminal limpia. Tus vergüenzas también.</span></div>';return null}},
+};
+function addTerminalLine(html){
+  const out=document.getElementById('terminal-output');
+  const d=document.createElement('div');d.className='terminal-line';d.innerHTML=html;
+  out.appendChild(d);out.scrollTop=out.scrollHeight;
+}
+function handleTerminal(e){
+  if(e.key!=='Enter')return;
+  const inp=document.getElementById('terminal-input');
+  const cmd=inp.value.trim().toLowerCase();
+  inp.value='';
+  addTerminalLine(`<span class="prompt">conocidoh@quimii:~$</span> <span class="cmd">${cmd}</span>`);
+  const handler=termCmds[cmd];
+  if(handler){const r=handler.fn();if(r!==null&&r!==undefined){r.split('\n').forEach(l=>addTerminalLine(`<div>${l}</div>`))}}
+  else if(cmd){addTerminalLine(`<span class="error">comando no encontrado: ${cmd} — ¿escribiste bien? (probá "help")</span>`)}
+  document.getElementById('terminal-output').scrollTop=99999;
+}
+
+// AURA BARS
+function animateAura(){
+  document.querySelectorAll('.aura-bar').forEach((bar,i)=>{
+    const val=parseInt(bar.dataset.val);
+    setTimeout(()=>{
+      bar.style.width=val+'%';
+      const labels=['aura-v1','aura-v2','aura-v3','aura-v4'];
+      const label=document.getElementById(labels[i]);
+      if(label){let c=0;const iv=setInterval(()=>{c+=2;if(c>=val){c=val;clearInterval(iv)}label.textContent=c+'%'},20)}
+    },i*200+300);
+  });
+}
+const auraObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){animateAura();auraObs.disconnect()}})},{threshold:0.3});
+const auraEl=document.getElementById('aura');
+if(auraEl)auraObs.observe(auraEl);
+
+// TOASTS AUTOMÁTICOS
+setTimeout(()=>showToast('👾 Bienvenido a la birthday page de Conocidoh'),1500);
+setTimeout(()=>showToast('💙 Quimii está activo en tu corazón'),8000);
+setTimeout(()=>showToast('🎮 Probá el duelo de programadores'),16000);
+</script>
+</body>
+</html>
